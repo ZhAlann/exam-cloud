@@ -23,7 +23,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         <Link to="/" className="text-xl font-bold">Mon Application</Link>
       </div>
-      
+
       <div className="flex items-center space-x-4">
         {/* Afficher le nom de l'utilisateur s'il est connecté */}
         {isAuthenticated && (
@@ -31,7 +31,7 @@ const Navbar = () => {
             Bonjour, {username}
           </span>
         )}
-        
+
         {/* Lien vers le Panier avec le nombre d'articles */}
         <Link to="/cart" className="relative">
           <span>Panier</span>
@@ -41,7 +41,7 @@ const Navbar = () => {
             </span>
           )}
         </Link>
-        
+
         {/* Lien Connexion / Déconnexion */}
         {!isAuthenticated ? (
           <>
@@ -53,6 +53,7 @@ const Navbar = () => {
             Déconnexion
           </button>
         )}
+
       </div>
     </nav>
   );

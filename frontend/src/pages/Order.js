@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { createOrder } from "../services/api";
 
 const Order = () => {
   const navigate = useNavigate();
-  //recuperer le context panier
   const { cart, shippingAddress, paymentMethod, shippingMethod, dispatch } =
-    useCart(); // Récupérer le contenu du panier à partir du contexte
-  // Naviguer vers la page de commande
+    useCart();
+
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
+
+  const showMessage = (text, type = "success") => {
+    setMessage(text);
+    setMessageType(type);
+  };
+
   const handleShippingPage = () => {
     navigate("/shippig_payment");
   };
@@ -16,7 +23,6 @@ const Order = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Vérifier les champs manquants
     const missingFields = [];
     if (cart.length === 0) missingFields.push("panier");
     if (!shippingAddress) missingFields.push("adresse de livraison");
@@ -24,31 +30,27 @@ const Order = () => {
     if (!paymentMethod) missingFields.push("méthode de paiement");
 
     if (missingFields.length > 0) {
-      alert(
-        `Informations manquantes pour la commande :\n${missingFields
-          .map((field) => `• ${field}`)
-          .join("\n")}`
+      showMessage(
+        `Informations manquantes pour la commande : ${missingFields.join(", ")}`,
+        "error"
       );
       return;
     }
 
-    // Vérifier le détail de l'adresse de livraison
     const requiredAddressFields = ["street", "postalCode", "city", "country"];
     const missingAddressDetails = requiredAddressFields.filter(
       (field) => !shippingAddress[field]
     );
 
     if (missingAddressDetails.length > 0) {
-      alert(
-        `Adresse de livraison incomplète :\n${missingAddressDetails
-          .map((field) => `• ${field}`)
-          .join("\n")}`
+      showMessage(
+        `Adresse de livraison incomplète : ${missingAddressDetails.join(", ")}`,
+        "error"
       );
       return;
     }
 
     try {
-      // Créer la commande seulement si toutes les vérifications passent
       const orderDetails = {
         items: cart.map((item) => ({
           productId: item.id,
@@ -64,21 +66,32 @@ const Order = () => {
       const response = await createOrder(orderDetails);
 
       if (response.error) {
-        alert(`Erreur : ${response.message || "Échec de la commande"}`);
+        showMessage(response.message || "Échec de la commande.", "error");
         return;
       }
 
       dispatch({ type: "CLEAR_CART" });
-      alert("Commande confirmée avec succès !");
+      showMessage("Commande confirmée avec succès !");
     } catch (error) {
-      console.error("Erreur lors de la commande", error);
-      alert("Une erreur technique est survenue. Veuillez réessayer.");
+      showMessage("Une erreur technique est survenue. Veuillez réessayer.", "error");
     }
   };
 
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-4">Synthèse de la commande</h2>
+
+      {message && (
+        <div
+          className={`p-3 mb-4 rounded border ${messageType === "error"
+              ? "bg-red-100 text-red-700 border-red-300"
+              : "bg-green-100 text-green-700 border-green-300"
+            }`}
+        >
+          {message}
+        </div>
+      )}
+
       {cart.length === 0 ? (
         <p className="text-gray-600">Votre panier est vide.</p>
       ) : (
@@ -88,9 +101,7 @@ const Order = () => {
               <tr>
                 <th className="border border-gray-300 p-2">Produit(s)</th>
                 <th className="border border-gray-300 p-2">Quantité(s)</th>
-                <th className="border border-gray-300 p-2">
-                  Prix Unitaire (€)
-                </th>
+                <th className="border border-gray-300 p-2">Prix Unitaire (€)</th>
                 <th className="border border-gray-300 p-2">Prix Total (€)</th>
               </tr>
             </thead>
@@ -111,6 +122,7 @@ const Order = () => {
               ))}
             </tbody>
           </table>
+
           <p className="text-right font-bold text-lg mt-4">
             Total :{" "}
             {cart
@@ -119,12 +131,9 @@ const Order = () => {
             €
           </p>
 
-          {/* Nouvelles informations ajoutées ici */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h3 className="text-lg font-semibold mb-2">
-                Adresse de livraison
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">Adresse de livraison</h3>
               {shippingAddress ? (
                 <>
                   <div className="bg-gray-50 p-4 rounded">
@@ -134,16 +143,12 @@ const Order = () => {
                     </p>
                     <p>{shippingAddress.country}</p>
                   </div>
-                  <div>
-                    <div>
-                      <button
-                        onClick={handleShippingPage}
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                      >
-                        Modifier
-                      </button>
-                    </div>
-                  </div>
+                  <button
+                    onClick={handleShippingPage}
+                    className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
+                  >
+                    Modifier
+                  </button>
                 </>
               ) : (
                 <p className="text-gray-500">
@@ -154,32 +159,25 @@ const Order = () => {
 
             <div>
               <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">
-                  Méthode de livraison
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Méthode de livraison</h3>
                 <div className="bg-gray-50 p-4 rounded">
                   {shippingMethod || "Non spécifiée"}
                 </div>
               </div>
 
               <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">
-                  Méthode de paiement
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Méthode de paiement</h3>
                 <div className="bg-gray-50 p-4 rounded">
                   {paymentMethod || "Non spécifiée"}
                 </div>
               </div>
-              <div>
-                    <div>
-                      <button
-                        onClick={handleShippingPage}
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                      >
-                        Modifier
-                      </button>
-                    </div>
-                  </div>
+
+              <button
+                onClick={handleShippingPage}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Modifier
+              </button>
             </div>
           </div>
 

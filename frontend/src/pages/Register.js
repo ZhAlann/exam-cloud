@@ -9,8 +9,16 @@ const Register = () => {
     email: '',
     password: '',
   });
-  const [error, setError] = useState('');
+
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('success');
+
   const navigate = useNavigate();
+
+  const showMessage = (text, type = 'success') => {
+    setMessage(text);
+    setMessageType(type);
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -21,30 +29,66 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.password
+    ) {
+      showMessage(
+        'Veuillez remplir tous les champs.',
+        'error'
+      );
+      return;
+    }
+
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, formData);
-      alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
-      navigate('/login');
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/register`,
+        formData
+      );
+
+      showMessage(
+        'Inscription réussie ! Redirection vers la connexion...'
+      );
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+
     } catch (err) {
-      //console.error('Erreur lors de l\'inscription', err);
-      if (err.response) {
-        // Erreur renvoyée par le serveur
-        const { message } = err.response.data;
-        alert(message); // Affiche un message à l'utilisateur (vous pouvez remplacer par un toast)
+      if (err.response?.data?.message) {
+        showMessage(err.response.data.message, 'error');
       } else {
-        // Erreur réseau ou autre
-        console.error("Erreur réseau ou serveur", err);
-        alert("Une erreur est survenue. Veuillez réessayer.");
+        showMessage(
+          'Une erreur serveur est survenue.',
+          'error'
+        );
       }
-      setError('Une erreur est survenue lors de la création du compte.');
     }
   };
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-80">
-        <h2 className="text-2xl font-bold mb-4 text-center">Inscription</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded shadow-md w-80"
+      >
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Inscription
+        </h2>
+
+        {message && (
+          <div
+            className={`p-3 mb-4 rounded border ${messageType === 'error'
+                ? 'bg-red-100 text-red-700 border-red-300'
+                : 'bg-green-100 text-green-700 border-green-300'
+              }`}
+          >
+            {message}
+          </div>
+        )}
+
         <input
           type="text"
           name="username"
@@ -53,6 +97,7 @@ const Register = () => {
           onChange={handleChange}
           className="border border-gray-300 p-2 w-full mb-4"
         />
+
         <input
           type="email"
           name="email"
@@ -61,6 +106,7 @@ const Register = () => {
           onChange={handleChange}
           className="border border-gray-300 p-2 w-full mb-4"
         />
+
         <input
           type="password"
           name="password"
@@ -69,7 +115,13 @@ const Register = () => {
           onChange={handleChange}
           className="border border-gray-300 p-2 w-full mb-4"
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 w-full rounded">S'inscrire</button>
+
+        <button
+          type="submit"
+          className="bg-blue-500 text-white p-2 w-full rounded hover:bg-blue-600"
+        >
+          S'inscrire
+        </button>
       </form>
     </div>
   );

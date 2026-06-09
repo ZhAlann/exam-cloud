@@ -9,7 +9,13 @@ const Login = () => {
     password: "",
   });
   const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
+  const showMessage = (text, type = "success") => {
+    setMessage(text);
+    setMessageType(type);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -30,11 +36,13 @@ const Login = () => {
       if (error.response) {
         // Erreur renvoyée par le serveur
         const { message } = error.response.data;
-        alert(message); // Affiche un message à l'utilisateur (vous pouvez remplacer par un toast)
+        setMessage(message);
+        setMessageType("error");; // Affiche un message à l'utilisateur (vous pouvez remplacer par un toast)
       } else {
         // Erreur réseau ou autre
         console.error("Erreur réseau ou serveur", error);
-        alert("Une erreur est survenue. Veuillez réessayer.");
+        setMessage("Une erreur est survenue, veuillez ressayer");
+        setMessageType("error");
       }
     }
   };

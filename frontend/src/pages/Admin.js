@@ -15,6 +15,14 @@ const Admin = () => {
   const [loadingOrder, setLoadingOrder] = useState(null);
   const [newStock, setNewStock] = useState({}); // Stock temporaire par produit
   const [updatingStock, setUpdatingStock] = useState(null); // Stock en cours de mise à jour
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
+
+  const showMessage = (text, type = "success") => {
+    setMessage(text);
+    setMessageType(type);
+    setTimeout(() => setMessage(""), 4000);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,9 +48,9 @@ const Admin = () => {
         )
       );
 
-      alert(`Statut de la commande ${orderId} mis à jour en "${newStatus}".`);
+      showMessage(`Statut de la commande mis à jour en "${newStatus}".`);
     } catch (error) {
-      alert("Erreur lors de la mise à jour du statut de la commande.");
+      showMessage("Erreur lors de la mise à jour du statut de la commande.", "error");
     }
     setLoadingOrder(null); // Désactive le loader
   };
@@ -56,14 +64,13 @@ const Admin = () => {
     const stockValue = newStock[productId]; // Récupère la valeur saisie pour ce produit
 
     if (!stockValue || stockValue < 0) {
-      alert("Veuillez entrer une quantité de stock valide.");
+      showMessage("Veuillez entrer une quantité de stock valide.", "error");
       return;
     }
 
     try {
       setUpdatingStock(productId); // Active le loader
       await updateProductStock(productId, stockValue);
-      alert(`Stock du produit mis à jour à ${stockValue}.`);
 
       // Mise à jour de l'affichage avec le nouveau stock
       const updatedProducts = products.map((product) =>
@@ -73,11 +80,11 @@ const Admin = () => {
 
       // Réinitialisation du champ
       setNewStock({ ...newStock, [productId]: "" });
+      showMessage(`Stock du produit mis à jour à ${stockValue}.`);
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du stock :", error);
-      alert("Échec de la mise à jour du stock.");
+      showMessage("Échec de la mise à jour du stock.", "error");
     } finally {
-      setUpdatingStock(null); // Désactive le loader
+      setUpdatingStock(null);
     }
   };
 
