@@ -35,9 +35,21 @@ exports.register = async (req, res) => {
   authLog(`username is ${username} email is ${email} password is ${password}`);
 
   try {
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        message: 'Tous les champs sont obligatoires.',
+      });
+    }
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{12,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          'Le mot de passe doit contenir au minimum 12 caractères, une majuscule et un caractère spécial.',
+      });
+    }
     // Vérifier si l'email ou le nom d'utilisateur existe déjà
     const existingUser = await User.findOne({ email });
-    
+
     if (existingUser) {
       authLog(`user exist => ${JSON.stringify(existingUser)}`)
       return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
