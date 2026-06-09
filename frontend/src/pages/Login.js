@@ -8,41 +8,47 @@ const Login = () => {
     username: "",
     password: "",
   });
-  const navigate = useNavigate();
+
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
+
+  const navigate = useNavigate();
 
   const showMessage = (text, type = "success") => {
     setMessage(text);
     setMessageType(type);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!credentials.username || !credentials.password) {
+      showMessage("Veuillez renseigner le nom utilisateur et le mot de passe.", "error");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/auth/login`,
         credentials
       );
+
       const { token, role, username } = response.data;
 
-      // Stockage du token et rôle dans le localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("username", username);
       localStorage.setItem("role", role);
 
-      navigate("/"); // Redirige vers la page d'accueil après la connexion
+      showMessage("Connexion réussie.");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 800);
     } catch (error) {
-      // Gestion des erreurs
-      if (error.response) {
-        // Erreur renvoyée par le serveur
-        const { message } = error.response.data;
-        setMessage(message);
-        setMessageType("error");; // Affiche un message à l'utilisateur (vous pouvez remplacer par un toast)
+      if (error.response?.data?.message) {
+        showMessage(error.response.data.message, "error");
       } else {
-        // Erreur réseau ou autre
-        console.error("Erreur réseau ou serveur", error);
-        setMessage("Une erreur est survenue, veuillez ressayer");
-        setMessageType("error");
+        showMessage("Une erreur est survenue, veuillez réessayer.", "error");
       }
     }
   };
@@ -54,6 +60,18 @@ const Login = () => {
         className="bg-white p-6 rounded shadow-md w-80"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Connexion</h2>
+
+        {message && (
+          <div
+            className={`p-3 mb-4 rounded border ${messageType === "error"
+                ? "bg-red-100 text-red-700 border-red-300"
+                : "bg-green-100 text-green-700 border-green-300"
+              }`}
+          >
+            {message}
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="Nom d'utilisateur"
@@ -63,6 +81,7 @@ const Login = () => {
           }
           className="border border-gray-300 p-2 w-full mb-4"
         />
+
         <input
           type="password"
           placeholder="Mot de passe"
@@ -72,9 +91,10 @@ const Login = () => {
           }
           className="border border-gray-300 p-2 w-full mb-4"
         />
+
         <button
           type="submit"
-          className="bg-blue-500 text-white p-2 w-full rounded"
+          className="bg-blue-500 text-white p-2 w-full rounded hover:bg-blue-600"
         >
           Se connecter
         </button>

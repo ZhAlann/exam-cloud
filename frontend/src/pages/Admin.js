@@ -96,6 +96,16 @@ const Admin = () => {
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-4">Page d'administration</h2>
+      {message && (
+        <div
+          className={`p-3 mb-4 rounded border ${messageType === "error"
+              ? "bg-red-100 text-red-700 border-red-300"
+              : "bg-green-100 text-green-700 border-green-300"
+            }`}
+        >
+          {message}
+        </div>
+      )}
       {/* Gestion des Commandes */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold">Gestion des Commandes</h3>
