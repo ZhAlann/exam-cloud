@@ -7,7 +7,8 @@ const Order = () => {
   const navigate = useNavigate();
   const { cart, shippingAddress, paymentMethod, shippingMethod, dispatch } =
     useCart();
-
+  const selectedShippingMethod = shippingMethod || "Colissimo";
+  const selectedPaymentMethod = paymentMethod || "Carte bancaire";
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
 
@@ -26,8 +27,7 @@ const Order = () => {
     const missingFields = [];
     if (cart.length === 0) missingFields.push("panier");
     if (!shippingAddress) missingFields.push("adresse de livraison");
-    if (!shippingMethod) missingFields.push("méthode de livraison");
-    if (!paymentMethod) missingFields.push("méthode de paiement");
+
 
     if (missingFields.length > 0) {
       showMessage(
@@ -59,8 +59,8 @@ const Order = () => {
         })),
         total: cart.reduce((acc, item) => acc + item.price * item.quantity, 0),
         shippingAddress,
-        paymentMethod,
-        shippingMethod,
+        paymentMethod: selectedPaymentMethod,
+        shippingMethod: selectedShippingMethod,
       };
 
       const response = await createOrder(orderDetails);
@@ -84,8 +84,8 @@ const Order = () => {
       {message && (
         <div
           className={`p-3 mb-4 rounded border ${messageType === "error"
-              ? "bg-red-100 text-red-700 border-red-300"
-              : "bg-green-100 text-green-700 border-green-300"
+            ? "bg-red-100 text-red-700 border-red-300"
+            : "bg-green-100 text-green-700 border-green-300"
             }`}
         >
           {message}
@@ -161,14 +161,14 @@ const Order = () => {
               <div className="mb-4">
                 <h3 className="text-lg font-semibold mb-2">Méthode de livraison</h3>
                 <div className="bg-gray-50 p-4 rounded">
-                  {shippingMethod || "Non spécifiée"}
+                  {selectedShippingMethod}
                 </div>
               </div>
 
               <div className="mb-4">
                 <h3 className="text-lg font-semibold mb-2">Méthode de paiement</h3>
                 <div className="bg-gray-50 p-4 rounded">
-                  {paymentMethod || "Non spécifiée"}
+                  {selectedPaymentMethod}
                 </div>
               </div>
 

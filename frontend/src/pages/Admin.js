@@ -37,22 +37,25 @@ const Admin = () => {
   }, []);
 
   const handleOrderStatusChange = async (orderId, newStatus) => {
-    setLoadingOrder(orderId); // Active le loader
-    try {
-      await updateOrderStatus(orderId, newStatus);
+    setLoadingOrder(orderId);
 
-      // Mettre à jour l'état local après une mise à jour réussie
+    try {
+      const response = await updateOrderStatus(orderId, newStatus);
+
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order._id === orderId ? { ...order, status: newStatus } : order
+          order._id === orderId
+            ? { ...order, status: response.data.status ?? newStatus }
+            : order
         )
       );
 
-      showMessage(`Statut de la commande mis à jour en "${newStatus}".`);
+      showMessage(`Statut mis à jour en "${newStatus}".`);
     } catch (error) {
-      showMessage("Erreur lors de la mise à jour du statut de la commande.", "error");
+      showMessage("Erreur lors de la mise à jour du statut.", "error");
+    } finally {
+      setLoadingOrder(null);
     }
-    setLoadingOrder(null); // Désactive le loader
   };
 
   // const handleOrderValidation = async (orderId) => {
@@ -61,26 +64,28 @@ const Admin = () => {
   // };
 
   const handleStockUpdate = async (productId) => {
-    const stockValue = newStock[productId]; // Récupère la valeur saisie pour ce produit
+    const stockValue = Number(newStock[productId]);
 
-    if (!stockValue || stockValue < 0) {
+    if (Number.isNaN(stockValue) || stockValue < 0) {
       showMessage("Veuillez entrer une quantité de stock valide.", "error");
       return;
     }
 
     try {
-      setUpdatingStock(productId); // Active le loader
-      await updateProductStock(productId, stockValue);
+      setUpdatingStock(productId);
 
-      // Mise à jour de l'affichage avec le nouveau stock
-      const updatedProducts = products.map((product) =>
-        product._id === productId ? { ...product, stock: stockValue } : product
+      const response = await updateProductStock(productId, stockValue);
+
+      setProducts((prevProducts) =>
+        prevProducts.map((product) =>
+          product._id === productId
+            ? { ...product, stock: response.data.stock ?? stockValue }
+            : product
+        )
       );
-      setProducts(updatedProducts);
 
-      // Réinitialisation du champ
       setNewStock({ ...newStock, [productId]: "" });
-      showMessage(`Stock du produit mis à jour à ${stockValue}.`);
+      showMessage("Stock mis à jour avec succès.");
     } catch (error) {
       showMessage("Échec de la mise à jour du stock.", "error");
     } finally {
