@@ -36,7 +36,7 @@ const Register = () => {
         console.error("Erreur réseau ou serveur", err);
         alert("Une erreur est survenue. Veuillez réessayer.");
       }
-      //setError('Une erreur est survenue lors de la création du compte.');
+      setError('Une erreur est survenue lors de la création du compte.');
     }
   };
 
