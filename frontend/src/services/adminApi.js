@@ -5,7 +5,7 @@ const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api`;
 export const getOrders = () => {
   try {
     const token = localStorage.getItem("token");
-    return axios.get(`${API_BASE_URL}/orders`, {
+    return axios.get(`${API_BASE_URL}/admin/orders`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -19,7 +19,7 @@ export const getOrders = () => {
 export const getProducts = () => {
   try {
     const token = localStorage.getItem("token");
-    return axios.get(`${API_BASE_URL}/products`, {
+    return axios.get(`${API_BASE_URL}/admin/products`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -34,7 +34,7 @@ export const updateOrderStatus = (orderId, status) => {
   try {
     const token = localStorage.getItem("token");
     return axios.put(
-      `${API_BASE_URL}/orders/${orderId}/status`,
+      `${API_BASE_URL}/admin/orders/${orderId}/status`,
       { status },
       {
         headers: {
@@ -55,7 +55,7 @@ export const validateOrder = (orderId) => {
   try {
     const token = localStorage.getItem("token");
     return axios.put(
-      `${API_BASE_URL}/orders/${orderId}/validate`,
+      `${API_BASE_URL}/admin/orders/${orderId}/validate`,
       {},
       {
         headers: {
@@ -73,7 +73,7 @@ export const updateProductStock = (productId, stock) => {
   try {
     const token = localStorage.getItem("token");
     return axios.put(
-      `${API_BASE_URL}/products/${productId}/stock`,
+      `${API_BASE_URL}/admin/products/${productId}/stock`,
       { stock },
       {
         headers: {
