@@ -7,8 +7,10 @@ const Order = () => {
   const navigate = useNavigate();
   const { cart, shippingAddress, paymentMethod, shippingMethod, dispatch } =
     useCart();
-  const selectedShippingMethod = shippingMethod || "Colissimo";
-  const selectedPaymentMethod = paymentMethod || "Carte bancaire";
+  const selectedShippingMethod =
+    shippingMethod && shippingMethod.trim() !== "" ? shippingMethod : "Colissimo";
+  const selectedPaymentMethod =
+    paymentMethod && paymentMethod.trim() !== "" ? paymentMethod : "Carte bancaire";
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
 
@@ -59,10 +61,13 @@ const Order = () => {
         })),
         total: cart.reduce((acc, item) => acc + item.price * item.quantity, 0),
         shippingAddress,
-        paymentMethod: selectedPaymentMethod,
-        shippingMethod: selectedShippingMethod,
+        paymentMethod: paymentMethod && paymentMethod.trim() !== ""
+          ? paymentMethod
+          : "Carte bancaire",
+        shippingMethod: shippingMethod && shippingMethod.trim() !== ""
+          ? shippingMethod
+          : "Colissimo",
       };
-
       const response = await createOrder(orderDetails);
 
       if (response.error) {
