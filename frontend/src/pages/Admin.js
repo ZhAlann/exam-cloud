@@ -44,20 +44,8 @@ const Admin = () => {
 
     try {
       await updateOrderStatus(orderId, newStatus);
+      await fetchData();
 
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
-
-      setSelectedOrder((prevOrder) =>
-        prevOrder && prevOrder._id === orderId
-          ? { ...prevOrder, status: newStatus }
-          : prevOrder
-      );
-
-      fetchData();
       showMessage(`Statut mis à jour en "${newStatus}".`);
     } catch (error) {
       showMessage("Erreur lors de la mise à jour du statut.", "error");
@@ -78,19 +66,9 @@ const Admin = () => {
       setUpdatingStock(productId);
 
       await updateProductStock(productId, stockValue);
+      await fetchData();
 
-      setProducts((prevProducts) =>
-        prevProducts.map((product) =>
-          product._id === productId ? { ...product, stock: stockValue } : product
-        )
-      );
-
-      setNewStock((prevStock) => ({
-        ...prevStock,
-        [productId]: "",
-      }));
-
-      fetchData();
+      setNewStock({ ...newStock, [productId]: "" });
       showMessage("Stock mis à jour avec succès.");
     } catch (error) {
       showMessage("Échec de la mise à jour du stock.", "error");
@@ -106,8 +84,8 @@ const Admin = () => {
       {message && (
         <div
           className={`p-3 mb-4 rounded border ${messageType === "error"
-            ? "bg-red-100 text-red-700 border-red-300"
-            : "bg-green-100 text-green-700 border-green-300"
+              ? "bg-red-100 text-red-700 border-red-300"
+              : "bg-green-100 text-green-700 border-green-300"
             }`}
         >
           {message}
