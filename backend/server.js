@@ -8,7 +8,9 @@ const app = express();
 connectDB();
 
 app.use(cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000",
+        "https://exam-cloud-frontend.onrender.com"
+    ],
     credentials: true
 }));
 app.use(express.json());
