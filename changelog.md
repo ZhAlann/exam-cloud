@@ -19,7 +19,8 @@
 * Analyse des dépendances avec npm audit
 
 ### Corrections
-
+* SetError non utilisé dans frontend/pages/Register.js
+* Suppression du .gitignore du dossier frontend
 * Correction des warnings MongoDB dépréciés
 * Vérification des formulaires utilisateurs
 * Vérification des accès PUT/DELETE
