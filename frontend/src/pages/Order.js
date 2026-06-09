@@ -18,7 +18,7 @@ const Order = () => {
   };
 
   const handleShippingPage = () => {
-    navigate("/shippig_payment");
+    navigate("/shipping_payment");
   };
 
   const handleSubmit = async (e) => {
@@ -53,7 +53,7 @@ const Order = () => {
     try {
       const orderDetails = {
         items: cart.map((item) => ({
-          productId: item.id,
+          productId: item._id || item.id,
           quantity: item.quantity,
           price: item.price,
         })),
