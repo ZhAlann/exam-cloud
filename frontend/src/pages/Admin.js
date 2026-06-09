@@ -24,15 +24,19 @@ const Admin = () => {
     setTimeout(() => setMessage(""), 4000);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async () => {
+    try {
       const ordersResponse = await getOrders();
       setOrders(ordersResponse.data);
 
       const productsResponse = await getProducts();
       setProducts(productsResponse.data);
-    };
+    } catch (error) {
+      showMessage("Erreur lors du chargement des données administrateur.", "error");
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -42,13 +46,7 @@ const Admin = () => {
     try {
       const response = await updateOrderStatus(orderId, newStatus);
 
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === orderId
-            ? { ...order, status: response.data.status ?? newStatus }
-            : order
-        )
-      );
+      await fetchData();
 
       showMessage(`Statut mis à jour en "${newStatus}".`);
     } catch (error) {
@@ -76,13 +74,7 @@ const Admin = () => {
 
       const response = await updateProductStock(productId, stockValue);
 
-      setProducts((prevProducts) =>
-        prevProducts.map((product) =>
-          product._id === productId
-            ? { ...product, stock: response.data.stock ?? stockValue }
-            : product
-        )
-      );
+      await fetchData();
 
       setNewStock({ ...newStock, [productId]: "" });
       showMessage("Stock mis à jour avec succès.");
@@ -99,8 +91,8 @@ const Admin = () => {
       {message && (
         <div
           className={`p-3 mb-4 rounded border ${messageType === "error"
-              ? "bg-red-100 text-red-700 border-red-300"
-              : "bg-green-100 text-green-700 border-green-300"
+            ? "bg-red-100 text-red-700 border-red-300"
+            : "bg-green-100 text-green-700 border-green-300"
             }`}
         >
           {message}
