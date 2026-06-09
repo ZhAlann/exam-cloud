@@ -1,9 +1,8 @@
 // src/pages/Admin.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   getOrders,
   updateOrderStatus,
-  // validateOrder,
   getProducts,
   updateProductStock,
 } from "../services/adminApi";
@@ -13,18 +12,18 @@ const Admin = () => {
   const [products, setProducts] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loadingOrder, setLoadingOrder] = useState(null);
-  const [newStock, setNewStock] = useState({}); // Stock temporaire par produit
-  const [updatingStock, setUpdatingStock] = useState(null); // Stock en cours de mise à jour
+  const [newStock, setNewStock] = useState({});
+  const [updatingStock, setUpdatingStock] = useState(null);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
 
-  const showMessage = (text, type = "success") => {
+  const showMessage = useCallback((text, type = "success") => {
     setMessage(text);
     setMessageType(type);
     setTimeout(() => setMessage(""), 4000);
-  };
+  }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const ordersResponse = await getOrders();
       setOrders(ordersResponse.data);
@@ -34,18 +33,17 @@ const Admin = () => {
     } catch (error) {
       showMessage("Erreur lors du chargement des données administrateur.", "error");
     }
-  };
+  }, [showMessage]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleOrderStatusChange = async (orderId, newStatus) => {
     setLoadingOrder(orderId);
 
     try {
-      const response = await updateOrderStatus(orderId, newStatus);
-
+      await updateOrderStatus(orderId, newStatus);
       await fetchData();
 
       showMessage(`Statut mis à jour en "${newStatus}".`);
@@ -55,11 +53,6 @@ const Admin = () => {
       setLoadingOrder(null);
     }
   };
-
-  // const handleOrderValidation = async (orderId) => {
-  //   await validateOrder(orderId);
-  //   alert(`Commande ${orderId} validée.`);
-  // };
 
   const handleStockUpdate = async (productId) => {
     const stockValue = Number(newStock[productId]);
@@ -72,8 +65,7 @@ const Admin = () => {
     try {
       setUpdatingStock(productId);
 
-      const response = await updateProductStock(productId, stockValue);
-
+      await updateProductStock(productId, stockValue);
       await fetchData();
 
       setNewStock({ ...newStock, [productId]: "" });
@@ -88,17 +80,18 @@ const Admin = () => {
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-4">Page d'administration</h2>
+
       {message && (
         <div
           className={`p-3 mb-4 rounded border ${messageType === "error"
-            ? "bg-red-100 text-red-700 border-red-300"
-            : "bg-green-100 text-green-700 border-green-300"
+              ? "bg-red-100 text-red-700 border-red-300"
+              : "bg-green-100 text-green-700 border-green-300"
             }`}
         >
           {message}
         </div>
       )}
-      {/* Gestion des Commandes */}
+
       <div className="mb-6">
         <h3 className="text-xl font-semibold">Gestion des Commandes</h3>
         <ul>
@@ -110,6 +103,7 @@ const Admin = () => {
               <p>
                 <strong>Status :</strong> {order.status}
               </p>
+
               {order.status !== "Expédiée" && (
                 <button
                   onClick={() => handleOrderStatusChange(order._id, "Expédiée")}
@@ -148,7 +142,6 @@ const Admin = () => {
         </ul>
       </div>
 
-      {/* Gestion des Produits */}
       <div>
         <h2 className="text-xl font-bold">Gestion des Produits</h2>
         <table className="min-w-full border">
@@ -160,6 +153,7 @@ const Admin = () => {
               <th className="border px-4 py-2">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {products.map((product) => (
               <tr key={product._id} className="border">
@@ -180,6 +174,7 @@ const Admin = () => {
                       })
                     }
                   />
+
                   <button
                     onClick={() => handleStockUpdate(product._id)}
                     className="bg-green-500 text-white px-2 py-1 ml-2 rounded"
@@ -196,11 +191,11 @@ const Admin = () => {
         </table>
       </div>
 
-      {/* Fenêtre modale pour afficher les détails de la commande */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
             <h2 className="text-xl font-bold mb-4">Détails de la Commande</h2>
+
             <p>
               <strong>ID :</strong> {selectedOrder._id}
             </p>
@@ -210,6 +205,7 @@ const Admin = () => {
             <p>
               <strong>Total :</strong> {selectedOrder.total} €
             </p>
+
             <h3 className="text-lg font-semibold mt-4">Produits :</h3>
             <ul className="mt-2">
               {selectedOrder.items.map((item, index) => (
@@ -226,6 +222,7 @@ const Admin = () => {
                 </li>
               ))}
             </ul>
+
             <button
               onClick={() => setSelectedOrder(null)}
               className="bg-red-500 text-white px-4 py-2 mt-4 rounded"
